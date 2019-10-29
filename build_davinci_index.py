@@ -12,10 +12,11 @@ davinci_code_files = glob.glob('data/davinci_code/*.txt')
 
 # Define schema with title as a unique key
 # The only fields we have are chapter_title & chapter_text
-schema = ____
+schema = Schema(chapter_title=ID(stored=True, unique=True),
+                chapter_text=TEXT(stored=True, analyzer=StemmingAnalyzer()),)
 
 # Create an index named 'davinci' in 'davinci_idx' directory
-idx = ____
+idx = whoosh.index.create_in("davinci_idx", schema=schema, indexname="davinci")
 
 writer = idx.writer()
 for file in tqdm(davinci_code_files):
@@ -27,7 +28,9 @@ for file in tqdm(davinci_code_files):
         chapter_text = f.read()
 
     # Add info to index
-    ____
-
+    writer.update_document(
+        chapter_title=chapter_title,
+        chapter_text=chapter_text,
+    )
 # Finalize index build
-____
+writer.commit()
